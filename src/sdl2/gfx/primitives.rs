@@ -197,14 +197,13 @@ pub trait DrawRenderer {
     fn polygon<C: ToColor>(&self, vx: &[i16], vy: &[i16], color: C) -> Result<(), String>;
     fn aa_polygon<C: ToColor>(&self, vx: &[i16], vy: &[i16], color: C) -> Result<(), String>;
     fn filled_polygon<C: ToColor>(&self, vx: &[i16], vy: &[i16], color: C) -> Result<(), String>;
-    fn textured_polygon<C: ToColor>(
+    fn textured_polygon(
         &self,
         vx: &[i16],
         vy: &[i16],
         texture: &Surface,
         texture_dx: i16,
         texture_dy: i16,
-        color: C,
     ) -> Result<(), String>;
     fn bezier<C: ToColor>(&self, vx: &[i16], vy: &[i16], s: i32, color: C) -> Result<(), String>;
     fn character<C: ToColor>(&self, x: i16, y: i16, c: char, color: C) -> Result<(), String>;
@@ -556,16 +555,22 @@ where
         }
     }
     #[allow(unused_variables)]
-    fn textured_polygon<C: ToColor>(
+    fn textured_polygon(
         &self,
         vx: &[i16],
         vy: &[i16],
         texture: &Surface,
         texture_dx: i16,
         texture_dy: i16,
-        color: C,
     ) -> Result<(), String> {
-        unimplemented!()
+        let ret = unsafe {
+            primitives::texturedPolygon(self.raw(), vx.as_ptr(), vy.as_ptr(), 3, texture.raw(), texture_dx as i32, texture_dy as i32)
+        };
+        if ret == 0 {
+            Ok(())
+        } else {
+            Err(get_error())
+        }
     }
 
     fn bezier<C: ToColor>(&self, vx: &[i16], vy: &[i16], s: i32, color: C) -> Result<(), String> {
